@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Bot</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Voice Bot</h1>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <div id="chat-container" class="h-96 overflow-y-auto mb-4 p-4 bg-gray-50 rounded">
+                    <div class="bot-message">
+                        Hello! I'm your voice assistant. Click the microphone button and ask me anything!
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <button id="micButton" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 flex items-center justify-center">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                        </svg>
+                        Start Listening
+                    </button>
+                    <button id="clearButton" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-full transition duration-300">
+                        Clear Chat
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Suggested Questions</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button class="suggestion-btn">What should we know about your life story in a few sentences?</button>
+                    <button class="suggestion-btn">What's your #1 superpower?</button>
+                    <button class="suggestion-btn">What are the top 3 areas you'd like to grow in?</button>
+                    <button class="suggestion-btn">What misconception do your coworkers have about you?</button>
+                    <button class="suggestion-btn">How do you push your boundaries and limits?</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
