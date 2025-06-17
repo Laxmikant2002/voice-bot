@@ -197,11 +197,13 @@ If you see logs like the following:
 OpenAI streaming failed: RateLimitError: 429 You exceeded your current quota, please check your plan and billing details.
 ```
 
-This indicates that your OpenAI API key has exceeded its quota limit. The system will automatically fall back to using Gemini as designed. To resolve this:
+This indicates that your OpenAI API key has exceeded its quota limit. The system will automatically fall back to using Gemini as designed. This is normal behavior and the voice bot will continue to function correctly by using Gemini instead.
+
+To address this issue:
 
 1. **Update your OpenAI billing**: Visit [OpenAI API Dashboard](https://platform.openai.com/account/billing) to add payment information or increase your quota.
 
-2. **Use Gemini as primary**: If you prefer to use Gemini by default and avoid the failed OpenAI attempts:
+2. **Use Gemini as primary**: To avoid the OpenAI error messages completely, you can configure the system to use Gemini as the primary AI service:
    ```
    # In .env file
    # Comment out or remove the OpenAI API key
@@ -214,7 +216,45 @@ This indicates that your OpenAI API key has exceeded its quota limit. The system
    USE_MOCK_RESPONSES=true
    ```
 
-Note: The failover system is working correctly when you see these errors - the bot continues functioning with Gemini responses even though OpenAI calls are failing.
+**Important**: When you see the OpenAI quota errors in your logs, this confirms that the failover mechanism is working correctly. Your voice bot continues functioning with Gemini responses even when OpenAI calls are failing.
+
+## Common Issues and Solutions
+
+| Issue | Error Message | Solution |
+| ----- | ------------ | -------- |
+| OpenAI Quota Exceeded | `RateLimitError: 429 You exceeded your current quota` | The system will automatically use Gemini instead. To fix: Add payment info in the OpenAI dashboard or remove the OpenAI key from .env to use only Gemini. |
+| PowerShell Command Chaining | `The token '&&' is not a valid statement separator` | Use semicolons instead: `cd "path\to\project"; npm run build` |
+| PowerShell Multiple Deletes | `A positional parameter cannot be found that accepts argument...` | Use `Remove-Item -Path "file1", "file2"` format |
+| Voice Not Working | Browser shows microphone not accessible | Click the secure/lock icon in your browser and grant microphone permissions |
+| Slow Initial Response | First response takes longer than expected | This is normal. The AI services establish a connection on the first request. Subsequent responses will be faster. |
+| AWS SDK Warning | `The AWS SDK for JavaScript (v2) is in maintenance mode` | This is just a warning and doesn't affect functionality. You can upgrade to AWS SDK v3 in a future update if desired. |
+
+For any other issues, check the server logs for detailed error information.
+
+## Understanding the OpenAI to Gemini Fallback
+
+This voice bot is designed with a robust fallback mechanism. Here's how it works:
+
+1. **Primary AI Service**: The system first attempts to use OpenAI (if configured)
+2. **Automatic Fallback**: If OpenAI fails for any reason (such as quota limits, as seen in the logs), the system automatically switches to Gemini
+3. **Quality Checking**: Even when OpenAI returns a response, the system validates the quality and falls back to Gemini if the response is inadequate
+
+When you see logs like this:
+```
+OpenAI streaming failed: RateLimitError: 429 You exceeded your current quota...
+```
+
+This is not an error in the application but rather confirmation that the fallback system is working as designed. The bot will continue to function using Gemini API instead.
+
+### How to Test the Fallback:
+
+1. Set both API keys in your .env file
+2. Run the application: `npm run dev`
+3. Ask the bot a question
+4. In the logs, you'll see which AI service responded (OpenAI or Gemini)
+5. If you're experiencing quota limits with OpenAI, you'll see the error followed by a successful Gemini response
+
+This dual-AI approach ensures your voice bot remains operational even when one service is unavailable or has issues.
 
 ## License
 
@@ -226,7 +266,11 @@ MIT
 
 Run the pre-deployment check script to ensure your project is ready:
 
-```bash
+```powershell
+# For Windows PowerShell
+npm run deploy:check
+
+# For other shells (bash, etc.)
 npm run deploy:check
 ```
 
@@ -239,7 +283,9 @@ This will verify that:
 
 1. Create a repository on GitHub, GitLab, or any Git provider
 2. Initialize git in your project (if not already done):
-   ```bash
+   
+   ```powershell
+   # For Windows PowerShell
    git init
    git add .
    git commit -m "Initial commit, ready for deployment"
@@ -292,7 +338,9 @@ USE_ENCRYPTED_KEYS=false
 
 ### Terminal Commands for Deployment
 
-```bash
+```powershell
+# For Windows PowerShell
+
 # Install Render CLI (optional)
 npm install -g @renderinc/cli
 
@@ -308,6 +356,28 @@ render list
 # View logs of your deployed service
 render logs
 ```
+
+#### PowerShell Tips
+
+When working with PowerShell (as seen in your terminal), note these differences:
+
+1. For command chaining, use semicolons `;` instead of `&&`:
+   ```powershell
+   # INCORRECT in PowerShell:
+   cd "c:\path\to\project" && npm run build
+   
+   # CORRECT in PowerShell:
+   cd "c:\path\to\project"; npm run build
+   ```
+
+2. For deleting files, use `Remove-Item` instead of `del`:
+   ```powershell
+   # INCORRECT way to delete multiple files:
+   del file1.txt file2.txt
+   
+   # CORRECT way to delete multiple files:
+   Remove-Item -Path "file1.txt", "file2.txt"
+   ```
 
 ### Important Notes
 

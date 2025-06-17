@@ -6,8 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeEncryptedConfig = exports.config = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 const kmsUtil_1 = require("../utils/kmsUtil");
+/**
+ * Load environment variables from .env file
+ */
 dotenv_1.default.config();
-// Create initial config with encrypted keys
+/**
+ * Application configuration with support for encrypted API keys
+ */
 exports.config = {
     openaiApiKey: process.env.OPENAI_API_KEY || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
@@ -20,7 +25,9 @@ exports.config = {
     },
     useEncryptedKeys: process.env.USE_ENCRYPTED_KEYS === 'true'
 };
-// Setup function to initialize with decrypted keys
+/**
+ * Initializes configuration with decrypted API keys from AWS KMS
+ */
 const initializeEncryptedConfig = async () => {
     if (!exports.config.useEncryptedKeys) {
         // Do nothing if encryption is not enabled

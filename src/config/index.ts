@@ -2,9 +2,14 @@ import dotenv from 'dotenv';
 import { VoiceBotConfig } from '../types';
 import { KmsUtil } from '../utils/kmsUtil';
 
+/**
+ * Load environment variables from .env file
+ */
 dotenv.config();
 
-// Create initial config with encrypted keys
+/**
+ * Application configuration with support for encrypted API keys
+ */
 export const config: VoiceBotConfig = {
   openaiApiKey: process.env.OPENAI_API_KEY || '',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
@@ -18,7 +23,9 @@ export const config: VoiceBotConfig = {
   useEncryptedKeys: process.env.USE_ENCRYPTED_KEYS === 'true'
 };
 
-// Setup function to initialize with decrypted keys
+/**
+ * Initializes configuration with decrypted API keys from AWS KMS
+ */
 export const initializeEncryptedConfig = async (): Promise<void> => {
   if (!config.useEncryptedKeys) {
     // Do nothing if encryption is not enabled

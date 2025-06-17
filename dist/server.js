@@ -7,13 +7,13 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const chatRoutes_1 = __importDefault(require("./routes/chatRoutes"));
 const config_1 = require("./config");
-// Create Express application
+/**
+ * Express application serving the voice bot API and static frontend
+ */
 const app = (0, express_1.default)();
-// Middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(express_1.default.static('public'));
-// Routes
 app.use('/api/chat', chatRoutes_1.default);
 // Error handling middleware
 app.use((err, req, res, next) => {

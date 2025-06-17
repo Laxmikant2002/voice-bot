@@ -2,8 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.chatController = void 0;
 const chatService_1 = require("../services/chatService");
+/**
+ * Service instance for processing AI chat requests
+ */
 const chatService = new chatService_1.ChatService();
+/**
+ * Chat controller for handling message and streaming endpoints
+ */
 exports.chatController = {
+    /**
+     * Processes regular (non-streaming) message requests
+     */
     async handleMessage(req, res) {
         try {
             console.log('Received message request:', req.body);
@@ -14,14 +23,11 @@ exports.chatController = {
                     message: 'Message is required and must be a string',
                     statusCode: 400
                 };
-                console.log('Validation failed:', error);
                 res.status(400).json(error);
                 return;
             }
             console.log('Processing message:', message);
             const response = await chatService.getResponse(message);
-            console.log('Response generated:', response);
-            // Add information about which AI service was used (if provided by the service)
             if (response.source) {
                 console.log(`Response came from: ${response.source}`);
             }
@@ -31,7 +37,7 @@ exports.chatController = {
             console.error('Error in chat controller:', error);
             const errorResponse = {
                 error: 'Internal Server Error',
-                message: error?.message || 'Failed to process chat message',
+                message: error instanceof Error ? error.message : 'Failed to process chat message',
                 statusCode: 500
             };
             res.status(500).json(errorResponse);
@@ -51,26 +57,21 @@ exports.chatController = {
                 res.status(400).json(error);
                 return;
             }
-            // Set headers for SSE (Server-Sent Events)
+            // Configure SSE (Server-Sent Events) connection
             res.setHeader('Content-Type', 'text/event-stream');
             res.setHeader('Cache-Control', 'no-cache');
             res.setHeader('Connection', 'keep-alive');
-            res.flushHeaders(); // Flush the headers to establish SSE with client
+            res.flushHeaders();
             console.log('Processing streaming message:', message);
             try {
-                // Get streaming response generator
                 const streamGenerator = chatService.getStreamingResponse(message);
-                // Stream each chunk to the client
                 for await (const chunk of streamGenerator) {
-                    // Format as an SSE event
-                    res.write(`data: ${JSON.stringify(chunk)}\n\n`); // Ensure data is sent immediately
-                    // In some Express implementations, response might have a flush method
+                    res.write(`data: ${JSON.stringify(chunk)}\n\n`);
                     const response = res;
                     if (typeof response.flush === 'function') {
                         response.flush();
                     }
                 }
-                // End the stream with a done event
                 res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
                 res.end();
             }

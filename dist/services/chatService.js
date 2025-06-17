@@ -7,15 +7,20 @@ exports.ChatService = void 0;
 const openai_1 = __importDefault(require("openai"));
 const generative_ai_1 = require("@google/generative-ai");
 const config_1 = require("../config");
-// Constants for token management
+/**
+ * Constants for token management to control context size
+ */
 const MAX_CONTEXT_TOKENS = 4096;
-const TOKENS_PER_CHARACTER = 0.25; // Simple approximation: ~4 characters per token
+const TOKENS_PER_CHARACTER = 0.25;
+/**
+ * ChatService handles interactions with multiple AI providers (OpenAI and Google Gemini)
+ * with automatic fallback between them when one fails or returns low-quality responses
+ */
 class ChatService {
     constructor() {
         this.geminiModel = null;
         this.messages = [];
         this.currentGeminiModel = '';
-        // Add API failure tracking for circuit breaker pattern
         this.apiFailureCount = 0;
         this.circuitBreakerThreshold = 3;
         this.openai = new openai_1.default({
@@ -91,10 +96,8 @@ class ChatService {
       
       Answer honestly and authentically, as if you were sharing your own personal experiences and traits.`;
             let responseText;
-            // Use config to determine if we should use a mock response
             const useMockResponse = config_1.config.useMockResponses || !config_1.config.openaiApiKey;
             if (useMockResponse) {
-                // Provide mock responses for testing without API calls
                 const msgLower = message.toLowerCase();
                 if (msgLower.includes('superpower')) {
                     responseText = "My #1 superpower is definitely deep analytical thinking. I can quickly break down complex problems, see patterns others might miss, and develop systematic approaches to solving challenges. This has helped me tremendously in both my professional work and personal projects.";
@@ -132,7 +135,6 @@ class ChatService {
             }
             else {
                 try {
-                    // Use the enhanced fallback mechanism for AI responses
                     const aiResponse = await this.getAIResponse(systemMessage);
                     responseText = aiResponse.text;
                     // Reset failure count on success
@@ -324,7 +326,6 @@ class ChatService {
     async getAIResponse(systemMessage) {
         const openAIAvailable = config_1.config.openaiApiKey && !config_1.config.useMockResponses;
         const geminiAvailable = this.geminiModel && config_1.config.geminiApiKey && !config_1.config.useMockResponses;
-        // Try OpenAI first if available
         if (openAIAvailable) {
             try {
                 const preferredOpenAIModel = config_1.config.modelPreferences.openai;
@@ -342,7 +343,6 @@ class ChatService {
                     max_tokens: 300,
                 });
                 const responseText = completion.choices[0].message.content;
-                // Validate response quality
                 if (this.isQualityResponse(responseText)) {
                     console.log('OpenAI provided a quality response');
                     return { text: responseText || '', source: `OpenAI (${config_1.config.modelPreferences.openai})` };

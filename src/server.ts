@@ -3,15 +3,15 @@ import cors from 'cors';
 import chatRoutes from './routes/chatRoutes';
 import { config } from './config';
 
-// Create Express application
+/**
+ * Express application serving the voice bot API and static frontend
+ */
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Routes
 app.use('/api/chat', chatRoutes);
 
 // Error handling middleware

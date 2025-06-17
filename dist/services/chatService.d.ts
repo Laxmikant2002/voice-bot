@@ -1,4 +1,8 @@
 import { ChatMessage } from '../types';
+/**
+ * ChatService handles interactions with multiple AI providers (OpenAI and Google Gemini)
+ * with automatic fallback between them when one fails or returns low-quality responses
+ */
 export declare class ChatService {
     private openai;
     private geminiModel;

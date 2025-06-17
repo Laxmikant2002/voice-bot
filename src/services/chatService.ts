@@ -3,16 +3,21 @@ import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { ChatMessage } from '../types';
 import { config } from '../config';
 
-// Constants for token management
+/**
+ * Constants for token management to control context size
+ */
 const MAX_CONTEXT_TOKENS = 4096;
-const TOKENS_PER_CHARACTER = 0.25; // Simple approximation: ~4 characters per token
+const TOKENS_PER_CHARACTER = 0.25;
 
+/**
+ * ChatService handles interactions with multiple AI providers (OpenAI and Google Gemini)
+ * with automatic fallback between them when one fails or returns low-quality responses
+ */
 export class ChatService {
   private openai: OpenAI;
   private geminiModel: GenerativeModel | null = null;
   private messages: ChatMessage[] = [];
   private currentGeminiModel = '';
-  // Add API failure tracking for circuit breaker pattern
   private apiFailureCount = 0;
   private circuitBreakerThreshold = 3;
   constructor() {
@@ -97,14 +102,10 @@ export class ChatService {
       - People might think you're always serious, but you have a playful side
       - You push your boundaries by taking on challenging projects outside your comfort zone
       
-      Answer honestly and authentically, as if you were sharing your own personal experiences and traits.`;
-
-      let responseText;
-      // Use config to determine if we should use a mock response
+      Answer honestly and authentically, as if you were sharing your own personal experiences and traits.`;      let responseText;
       const useMockResponse = config.useMockResponses || !config.openaiApiKey;
       
       if (useMockResponse) {
-        // Provide mock responses for testing without API calls
         const msgLower = message.toLowerCase();
         
         if (msgLower.includes('superpower')) {
@@ -138,10 +139,8 @@ export class ChatService {
           responseText = "My greatest strength is my persistence when facing difficult problems. I don't give up easily. My biggest weakness is probably that I sometimes get too focused on perfecting details when a good-enough solution would suffice. I'm working on finding better balance there.";
             } else {
           responseText = "That's an interesting question! As someone who values continuous growth and analytical thinking, I'm always looking for new challenges to tackle and ways to push my boundaries. Could you ask me something about my superpower, areas for growth, or how I approach challenges?";
-        }
-      } else {
+        }      } else {
         try {
-          // Use the enhanced fallback mechanism for AI responses
           const aiResponse = await this.getAIResponse(systemMessage);
           responseText = aiResponse.text;
           
@@ -349,11 +348,11 @@ export class ChatService {
   private async getAIResponse(systemMessage: string): Promise<{ text: string; source: string }> {
     const openAIAvailable = config.openaiApiKey && !config.useMockResponses;
     const geminiAvailable = this.geminiModel && config.geminiApiKey && !config.useMockResponses;
-    
-    // Try OpenAI first if available
-    if (openAIAvailable) {
-      try {        const preferredOpenAIModel = config.modelPreferences.openai;
+      if (openAIAvailable) {
+      try {
+        const preferredOpenAIModel = config.modelPreferences.openai;
         console.log(`Attempting to use OpenAI API with model ${preferredOpenAIModel}...`);
+        
         const completion = await this.openai.chat.completions.create({
           model: preferredOpenAIModel,
           messages: [
@@ -369,8 +368,8 @@ export class ChatService {
         
         const responseText = completion.choices[0].message.content;
         
-        // Validate response quality
-        if (this.isQualityResponse(responseText)) {          console.log('OpenAI provided a quality response');
+        if (this.isQualityResponse(responseText)) {
+          console.log('OpenAI provided a quality response');
           return { text: responseText || '', source: `OpenAI (${config.modelPreferences.openai})` };
         }
         
