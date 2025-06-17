@@ -8,12 +8,19 @@ export interface ChatResponse {
   audioUrl?: string;
 }
 
+export interface ModelPreferences {
+  openai: string;
+  gemini: string;
+}
+
 export interface VoiceBotConfig {
   openaiApiKey: string;
   geminiApiKey: string;
   port: number;
   environment: 'development' | 'production';
   useMockResponses: boolean;
+  modelPreferences: ModelPreferences;
+  useEncryptedKeys?: boolean;
 }
 
 export interface ErrorResponse {

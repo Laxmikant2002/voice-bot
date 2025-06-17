@@ -26,6 +26,11 @@ app.use((err, req, res, next) => {
 });
 // Start server
 app.listen(config_1.config.port, () => {
-    console.log(`Server is running on port ${config_1.config.port} in ${config_1.config.environment} mode`);
+    const protocol = config_1.config.environment === 'production' ? 'https' : 'http';
+    const serverAddress = `${protocol}://localhost:${config_1.config.port}`;
+    console.log(`Server is running in ${config_1.config.environment} mode`);
+    console.log(`Access the application at: ${serverAddress}`);
+    console.log(`API endpoints available at: ${serverAddress}/api/chat/message`);
+    console.log('--------------------------------------------------');
 });
 //# sourceMappingURL=server.js.map

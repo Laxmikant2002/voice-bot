@@ -6,11 +6,17 @@ export interface ChatResponse {
     message: string;
     audioUrl?: string;
 }
+export interface ModelPreferences {
+    openai: string;
+    gemini: string;
+}
 export interface VoiceBotConfig {
     openaiApiKey: string;
     geminiApiKey: string;
     port: number;
     environment: 'development' | 'production';
+    useMockResponses: boolean;
+    modelPreferences: ModelPreferences;
 }
 export interface ErrorResponse {
     error: string;

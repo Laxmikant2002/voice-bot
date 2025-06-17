@@ -255,6 +255,14 @@ class VoiceBot {
         // Remove listening indicator if present
         this.removeListeningIndicator();
         
+        // Use streaming API for better user experience
+        if ('ReadableStream' in window && 'TextDecoder' in window) {
+            // Use streaming response if browser supports it
+            await this.sendStreamingMessage(message);
+            return;
+        }
+        
+        // Fallback to non-streaming for older browsers
         // Add user message to chat
         this.addMessage(message, 'user');
         
@@ -296,6 +304,121 @@ class VoiceBot {
             this.addMessage('Sorry, there was an error processing your request. Please try again.', 'bot');
             this.updateStatusIndicator('Error occurred', 'error');
         }
+    }    // Method to send a message and receive a streaming response
+    async sendStreamingMessage(message) {
+        if (!message.trim()) return;
+        
+        // Add user message to chat
+        this.addMessage(message, 'user');
+        
+        // Create a placeholder for the bot response that will be updated in real-time
+        const botMessageDiv = document.createElement('div');
+        botMessageDiv.className = 'bot-message typing';
+        
+        // Create typing indicator
+        const typingIndicator = document.createElement('div');
+        typingIndicator.className = 'typing-indicator';
+        typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+        botMessageDiv.appendChild(typingIndicator);
+        
+        // Create content container that will be updated as chunks arrive
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'content-container';
+        botMessageDiv.appendChild(contentContainer);
+        
+        // Add source container that will be updated when we know the AI source
+        const sourceContainer = document.createElement('div');
+        sourceContainer.className = 'ai-source';
+        botMessageDiv.appendChild(sourceContainer);
+        
+        // Add to chat container
+        this.chatContainer.appendChild(botMessageDiv);
+        this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+        
+        // Show processing indicator
+        this.updateStatusIndicator('Streaming response...', 'streaming');
+        
+        try {
+            // Create EventSource for SSE connection
+            const response = await fetch('/api/chat/stream', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Server error: ${response.status}`);
+            }
+            
+            // Set up response reader
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let responseText = '';
+            let source = '';
+              // Read stream chunks until done
+            let streamDone = false;
+            while (!streamDone) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    streamDone = true;
+                    break;
+                }const chunk = decoder.decode(value, { stream: true });
+                // Process SSE format - each message starts with "data: " and ends with "\n\n"
+                const events = chunk.split('\n\n').filter(Boolean);
+                
+                for (const event of events) {
+                    if (event.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(event.slice(5)); // Remove "data: " prefix
+                            
+                            if (data.done) {
+                                // Stream complete
+                                break;
+                            } else if (data.error) {
+                                // Handle error
+                                throw new Error(data.message || 'Error in streaming response');
+                            } else if (data.chunk) {
+                                // Update text with new chunk
+                                responseText += data.chunk;
+                                contentContainer.textContent = responseText;
+                                
+                                // Update AI source if available
+                                if (data.source && !source) {
+                                    source = data.source;
+                                    sourceContainer.textContent = source;
+                                }
+                                
+                                // Auto-scroll to show new content
+                                this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+                            }
+                        } catch (parseError) {
+                            console.error('Error parsing SSE data:', parseError);
+                        }
+                    }
+                }
+            }
+            
+            // Replace typing indicator with final message
+            botMessageDiv.classList.remove('typing');
+            typingIndicator.remove();
+            
+            // Reset status indicator
+            this.updateStatusIndicator('Idle', 'idle');
+            
+            // Speak the response
+            this.speakResponse(responseText);
+            
+        } catch (error) {
+            console.error('Error with streaming request:', error);
+            contentContainer.textContent = 'Sorry, there was an error processing your request. Please try again.';
+            sourceContainer.textContent = 'Error';
+            botMessageDiv.classList.remove('typing');
+            typingIndicator.remove();
+            this.updateStatusIndicator('Error occurred', 'error');
+        }
     }    addMessage(message, sender, extraHTML = '') {
         const messageDiv = document.createElement('div');
         messageDiv.className = sender === 'user' ? 'user-message' : 'bot-message';
@@ -331,15 +454,54 @@ class VoiceBot {
         
         // Scroll to bottom
         this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
-    }
-
-    speakResponse(text) {
+    }    speakResponse(text) {
         if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(text);
+            // Clean and optimize text for speech
+            const cleanText = this.optimizeForSpeech(text);
+            
+            const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.rate = 1;
             utterance.pitch = 1;
+            
+            // Add natural pauses at punctuation
+            utterance.onboundary = (event) => {
+                if (event.name === 'sentence' || event.name === 'word') {
+                    // Add slight pause at sentence boundaries
+                    if (text[event.charIndex] === '.') {
+                        // Small delay between sentences
+                        setTimeout(() => {}, 300);
+                    }
+                }
+            };
+            
             window.speechSynthesis.speak(utterance);
         }
+    }// Optimize text for speech synthesis
+    optimizeForSpeech(text) {
+        // Remove markdown formatting
+        let cleanText = text
+            .replace(/\*\*(.*?)\*\*/g, '$1') // Bold text
+            .replace(/\*(.*?)\*/g, '$1')     // Italic text
+            .replace(/`(.*?)`/g, '$1')       // Code blocks
+            .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Links
+            .replace(/#{1,6}\s(.*?)(?:\n|$)/g, '$1. ') // Headers
+            .replace(/\n\s*[-*+]\s/g, '. ') // List items
+            .replace(/\n/g, '. ')           // Newlines to periods for better pausing
+            .replace(/\s{2,}/g, ' ')        // Multiple spaces to single space
+            .replace(/\.\s*\./g, '.')       // Multiple periods to single
+            .trim();
+            
+        // Handle common abbreviations and symbols for better pronunciation
+        cleanText = cleanText
+            .replace(/(\d+)%/g, '$1 percent')
+            .replace(/&/g, ' and ')
+            .replace(/\$/g, ' dollar ')
+            .replace(/@/g, ' at ')
+            .replace(/#/g, ' number ')
+            .replace(/(\d):(\d)/g, '$1 $2') // Time formatting: 2:30 -> 2 30
+            .replace(/(\d+)x(\d+)/g, '$1 by $2'); // Dimensions: 1920x1080 -> 1920 by 1080
+            
+        return cleanText;
     }    clearChat() {
         // Stop listening if active
         if (this.isListening) {
@@ -397,4 +559,4 @@ class VoiceBot {
 // Initialize the voice bot when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     new VoiceBot();
-}); 
+});
