@@ -2,6 +2,12 @@
 
 A TypeScript-based voice-enabled chatbot that uses both OpenAI and Google Gemini APIs to respond to user questions with automatic failover capabilities. The system intelligently falls back to Gemini when OpenAI encounters rate limits or quality issues.
 
+
+
+```markdown
+## 🔗 Live Demo URL: https://voice-bot-rqar.onrender.com
+```
+
 ## Features
 
 - Real-time chat interactions using OpenAI (with auto-fallback to Gemini)
