@@ -222,39 +222,98 @@ MIT
 
 ## Deployment Guide (Render.com)
 
-Follow these steps to deploy your voice bot to Render.com's free tier:
+### Step 1: Pre-Deployment Checks
 
-### Step 1: Prepare Your Repository
+Run the pre-deployment check script to ensure your project is ready:
 
-1. Make sure you have committed all your changes to GitHub
-2. Your project should have the following:
-   - package.json with a `start` script
-   - A build process via `npm run build`
-   - render.yaml configuration file
+```bash
+npm run deploy:check
+```
 
-### Step 2: Deploy to Render.com
+This will verify that:
+- All required files exist
+- The build process works
+- Scripts are correctly configured
 
-1. Create a Render.com account at [https://render.com](https://render.com)
-2. Connect your GitHub account
-3. Click "New +" and select "Web Service"
-4. Find your repository and click "Connect"
-5. Render will automatically detect your render.yaml configuration
-6. Add your environment variables:
-   - OPENAI_API_KEY
-   - GEMINI_API_KEY
-   - NODE_ENV (set to "production")
-   - Other variables as needed
-7. Click "Create Web Service"
+### Step 2: Push to Git Repository
 
-### Step 3: Monitor Your Deployment
+1. Create a repository on GitHub, GitLab, or any Git provider
+2. Initialize git in your project (if not already done):
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit, ready for deployment"
+   git branch -M main
+   git remote add origin <your-repository-url>
+   git push -u origin main
+   ```
 
-1. Render will automatically build and deploy your application
-2. You can monitor the build logs in real-time
-3. Once deployed, you'll receive a URL for your application
+### Step 3: Deploy to Render.com
+
+1. Sign up or log in to [Render.com](https://render.com)
+2. From your Dashboard, click "New +" and select "Web Service"
+3. Connect your Git repository
+4. Configure your Web Service:
+   - Name: `voice-bot` (or your preferred name)
+   - Environment: `Node`
+   - Region: Choose the region closest to your users
+   - Branch: `main` (or your default branch)
+   - Build Command: `npm install && npm run build`
+   - Start Command: `npm start`
+   - Plan: `Free`
+
+### Step 4: Configure Environment Variables
+
+Add these environment variables in the Render dashboard:
+
+```
+NODE_ENV=production
+PORT=10000
+OPENAI_API_KEY=your_openai_api_key
+GEMINI_API_KEY=your_gemini_api_key
+PREFERRED_OPENAI_MODEL=gpt-3.5-turbo
+PREFERRED_GEMINI_MODEL=gemini-2.0-flash
+USE_MOCK_RESPONSES=false
+USE_ENCRYPTED_KEYS=false
+```
+
+### Step 5: Deploy and Monitor
+
+1. Click "Create Web Service"
+2. Render will automatically build and deploy your application
+3. You can monitor the build process in real-time
+4. When deployment is complete, your app will be available at the URL provided by Render
+
+### Step 6: Test Your Deployed Application
+
+1. Test the voice bot functionality at your Render URL
+2. Check that both OpenAI and Gemini fallback work correctly
+3. Verify the streaming functionality works in production
+
+### Terminal Commands for Deployment
+
+```bash
+# Install Render CLI (optional)
+npm install -g @renderinc/cli
+
+# Login to Render (if using CLI)
+render login
+
+# Deploy manually using Render CLI (optional)
+render deploy
+
+# Check deployment status
+render list
+
+# View logs of your deployed service
+render logs
+```
 
 ### Important Notes
 
-- The free tier will spin down after periods of inactivity
-- The first request after inactivity may take longer to respond
-- You get 750 hours of runtime per month on the free tier
-- Keep your API keys secure by using Render's environment variables
+- **Free Tier Limitations**: The free tier will automatically spin down after 15 minutes of inactivity. The first request after inactivity may take up to 30 seconds as the service spins back up.
+- **Resource Limits**: Free tier provides 512 MB RAM, shared CPU, and 750 hours of runtime per month.
+- **Custom Domains**: To use a custom domain, you'll need to upgrade to a paid plan.
+- **Environment Variables**: Never commit your API keys to Git. Always use Render's environment variables feature.
+- **Automatic Deploys**: Render automatically rebuilds and deploys when you push changes to your repository.
+- **Logs**: Access application logs directly from the Render dashboard for troubleshooting.
