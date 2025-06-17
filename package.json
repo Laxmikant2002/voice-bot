@@ -12,7 +12,8 @@
     "watch": "tsc -w",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "deploy:check": "node render-deploy.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",

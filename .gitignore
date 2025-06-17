@@ -1,4 +1,38 @@
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*
+package-lock.json
+
+# Environment variables
 .env
-npm-debug.log
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE / Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
 .DS_Store
+
+# Build output
+# Don't ignore dist for Render.com deployment
+# dist/
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+
+# Local development
+.vercel
+.netlify

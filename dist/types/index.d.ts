@@ -17,6 +17,7 @@ export interface VoiceBotConfig {
     environment: 'development' | 'production';
     useMockResponses: boolean;
     modelPreferences: ModelPreferences;
+    useEncryptedKeys?: boolean;
 }
 export interface ErrorResponse {
     error: string;

@@ -219,3 +219,42 @@ Note: The failover system is working correctly when you see these errors - the b
 ## License
 
 MIT
+
+## Deployment Guide (Render.com)
+
+Follow these steps to deploy your voice bot to Render.com's free tier:
+
+### Step 1: Prepare Your Repository
+
+1. Make sure you have committed all your changes to GitHub
+2. Your project should have the following:
+   - package.json with a `start` script
+   - A build process via `npm run build`
+   - render.yaml configuration file
+
+### Step 2: Deploy to Render.com
+
+1. Create a Render.com account at [https://render.com](https://render.com)
+2. Connect your GitHub account
+3. Click "New +" and select "Web Service"
+4. Find your repository and click "Connect"
+5. Render will automatically detect your render.yaml configuration
+6. Add your environment variables:
+   - OPENAI_API_KEY
+   - GEMINI_API_KEY
+   - NODE_ENV (set to "production")
+   - Other variables as needed
+7. Click "Create Web Service"
+
+### Step 3: Monitor Your Deployment
+
+1. Render will automatically build and deploy your application
+2. You can monitor the build logs in real-time
+3. Once deployed, you'll receive a URL for your application
+
+### Important Notes
+
+- The free tier will spin down after periods of inactivity
+- The first request after inactivity may take longer to respond
+- You get 750 hours of runtime per month on the free tier
+- Keep your API keys secure by using Render's environment variables
