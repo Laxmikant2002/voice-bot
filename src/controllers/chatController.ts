@@ -22,8 +22,11 @@ export const chatController = {
       }
       
       console.log('Processing message:', message);
-      const response = await chatService.getResponse(message);
-      console.log('Response generated:', response);
+      const response = await chatService.getResponse(message);      console.log('Response generated:', response);
+      // Add information about which AI service was used (if provided by the service)
+      if (response.source) {
+        console.log(`Response came from: ${response.source}`);
+      }
       res.json(response);
     } catch (error: any) {
       console.error('Error in chat controller:', error);
