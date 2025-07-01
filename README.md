@@ -4,7 +4,7 @@ A TypeScript-based voice-enabled chatbot that uses both OpenAI and Google Gemini
 
 
 
-## 🔗 Live Demo: [voice-bot-rqar.onrender.com](https://voice-bot-rqar.onrender.com)  
+## 🔗 Live Demo: [voice-bot-rqar.onrender.com](https://voice-bot-txpd.onrender.com/)
 ## 💻 GitHub Repository: [github.com/Laxmikant2002/voice-bot](https://github.com/Laxmikant2002/voice-bot)
 
 
