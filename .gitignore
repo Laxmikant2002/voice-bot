@@ -7,32 +7,75 @@ yarn-error.log*
 npm-debug.log*
 package-lock.json
 
-# Environment variables
+# Environment variables (CRITICAL - Contains API keys!)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+# Allow .env.example template file
+!.env.example
 
 # IDE / Editors
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+!.vscode/tasks.json
 .idea/
 *.swp
 *.swo
 .DS_Store
+Thumbs.db
 
 # Build output
 # Don't ignore dist for Render.com deployment
 # dist/
 coverage/
 .nyc_output/
+*.tsbuildinfo
 
 # Logs
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# AWS files (if using AWS services)
+.aws/
+aws-config.json
 
 # Local development
 .vercel
 .netlify
+.cache/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Security keys and certificates
+*.key
+*.cert
+*.csr
+*.crt
+*.pem
+*.p12
+*.pfx
